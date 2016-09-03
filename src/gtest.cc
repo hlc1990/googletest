@@ -156,13 +156,28 @@ using internal::Shuffle;
 // Constants.
 
 // A test whose test case name or test name matches this filter is
-// disabled and not run.
+#ifdef WINRT
+//WINRT TODO: for now, add the test cases we want to disable on build machine
+//as they are taking too much of the time to run on build machine.
+//we will need to find a better way to provide the
+//list of disabled test cases during runtime, probably from command line?
+static const char kDisableTestFilter[] = "DISABLED_*:*/DISABLED_*"
+                                         ":TestVirtualIPv4"
+                                         ":TestGetBothLoad";
+#else
 static const char kDisableTestFilter[] = "DISABLED_*:*/DISABLED_*";
+#endif
 
 // A test case whose name matches this filter is considered a death
 // test case and will be run before test cases whose name doesn't
 // match this filter.
 static const char kDeathTestCaseFilter[] = "*DeathTest:*DeathTest/*";
+
+#ifdef WINRT_MINI_TESTS
+//arbitrary selected several tests for smoke tests
+static const char kMinCaseFilter[] = "AsyncHttpRequestTest:AudioEncoderCngTest"
+                                            ":AudioRingBufferTest:DtlsTransportChannelTest";
+#endif
 
 // A test filter that matches everything.
 static const char kUniversalFilter[] = "*";
@@ -850,14 +865,19 @@ TimeInMillis GetTimeInMillis() {
 
 // class String.
 
-#if GTEST_OS_WINDOWS_MOBILE
+#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_RT || GTEST_OS_WINDOWS_PHONE
 // Creates a UTF-16 wide string from the given ANSI string, allocating
 // memory using new. The caller is responsible for deleting the return
 // value using delete[]. Returns the wide string, or NULL if the
 // input is NULL.
 LPCWSTR String::AnsiToUtf16(const char* ansi) {
   if (!ansi) return NULL;
+
+  // since it's MultiByteToWideChar expects int, disable warning for this line
+#pragma warning (disable:4267)
   const int length = strlen(ansi);
+#pragma warning (default:4267)
+
   const int unicode_length =
       MultiByteToWideChar(CP_ACP, 0, ansi, length,
                           NULL, 0);
@@ -4814,8 +4834,15 @@ int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
       test_info->is_disabled_ = is_disabled;
 
       const bool matches_filter =
-          internal::UnitTestOptions::FilterMatchesTest(test_case_name,
+#ifndef WINRT_MINI_TESTS
+        internal::UnitTestOptions::FilterMatchesTest(test_case_name,
                                                        test_name);
+#else 
+        internal::UnitTestOptions::MatchesFilter(test_case_name,
+        kMinCaseFilter) ||
+        internal::UnitTestOptions::MatchesFilter(test_name,
+        kMinCaseFilter);
+#endif
       test_info->matches_filter_ = matches_filter;
 
       const bool is_runnable =

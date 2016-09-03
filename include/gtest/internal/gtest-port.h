@@ -394,6 +394,9 @@
 #  include <direct.h>
 #  include <io.h>
 # endif
+# if GTEST_OS_WINDOWS_RT || GTEST_OS_WINDOWS_PHONE
+#  include <windows.h>
+# endif
 // In order to avoid having to include <windows.h>, use forward declaration
 // assuming CRITICAL_SECTION is a typedef of _RTL_CRITICAL_SECTION.
 // This assumption is verified by
