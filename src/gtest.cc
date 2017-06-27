@@ -156,28 +156,12 @@ using internal::Shuffle;
 // Constants.
 
 // A test whose test case name or test name matches this filter is
-#ifdef WINRT
-//WINRT TODO: for now, add the test cases we want to disable on build machine
-//as they are taking too much of the time to run on build machine.
-//we will need to find a better way to provide the
-//list of disabled test cases during runtime, probably from command line?
-static const char kDisableTestFilter[] = "DISABLED_*:*/DISABLED_*"
-                                         ":TestVirtualIPv4"
-                                         ":TestGetBothLoad";
-#else
 static const char kDisableTestFilter[] = "DISABLED_*:*/DISABLED_*";
-#endif
 
 // A test case whose name matches this filter is considered a death
 // test case and will be run before test cases whose name doesn't
 // match this filter.
 static const char kDeathTestCaseFilter[] = "*DeathTest:*DeathTest/*";
-
-#ifdef WINRT_MINI_TESTS
-//arbitrary selected several tests for smoke tests
-static const char kMinCaseFilter[] = "AsyncHttpRequestTest:AudioEncoderCngTest"
-                                            ":AudioRingBufferTest:DtlsTransportChannelTest";
-#endif
 
 // A test filter that matches everything.
 static const char kUniversalFilter[] = "*";
@@ -865,7 +849,7 @@ TimeInMillis GetTimeInMillis() {
 
 // class String.
 
-#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_RT || GTEST_OS_WINDOWS_PHONE
+#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_UWP || GTEST_OS_WINDOWS_PHONE
 // Creates a UTF-16 wide string from the given ANSI string, allocating
 // memory using new. The caller is responsible for deleting the return
 // value using delete[]. Returns the wide string, or NULL if the
@@ -2905,7 +2889,7 @@ enum GTestColor {
 };
 
 #if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE && \
-    !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT
+    !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_UWP
 
 // Returns the character attribute for the given color.
 WORD GetColorAttribute(GTestColor color) {
@@ -2976,7 +2960,7 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   va_start(args, fmt);
 
 #if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_SYMBIAN || GTEST_OS_ZOS || \
-    GTEST_OS_IOS || GTEST_OS_WINDOWS_PHONE || GTEST_OS_WINDOWS_RT
+    GTEST_OS_IOS || GTEST_OS_WINDOWS_PHONE || GTEST_OS_WINDOWS_UWP
   const bool use_color = AlwaysFalse();
 #else
   static const bool in_color_mode =
@@ -2992,7 +2976,7 @@ void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   }
 
 #if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE && \
-    !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT
+    !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_UWP
   const HANDLE stdout_handle = GetStdHandle(STD_OUTPUT_HANDLE);
 
   // Gets the current text color.
@@ -4161,7 +4145,7 @@ void UnitTest::AddTestPartResult(
     // with another testing framework) and specify the former on the
     // command line for debugging.
     if (GTEST_FLAG(break_on_failure)) {
-#if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT
+#if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_UWP
       // Using DebugBreak on Windows allows gtest to still break into a debugger
       // when a failure happens and both the --gtest_break_on_failure and
       // the --gtest_catch_exceptions flags are specified.
@@ -4239,7 +4223,7 @@ int UnitTest::Run() {
   // process. In either case the user does not want to see pop-up dialogs
   // about crashes - they are expected.
   if (impl()->catch_exceptions() || in_death_test_child_process) {
-# if !GTEST_OS_WINDOWS_MOBILE && !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT
+# if !GTEST_OS_WINDOWS_MOBILE && !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_UWP
     // SetErrorMode doesn't exist on CE.
     SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOALIGNMENTFAULTEXCEPT |
                  SEM_NOGPFAULTERRORBOX | SEM_NOOPENFILEERRORBOX);
@@ -4834,15 +4818,8 @@ int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
       test_info->is_disabled_ = is_disabled;
 
       const bool matches_filter =
-#ifndef WINRT_MINI_TESTS
-        internal::UnitTestOptions::FilterMatchesTest(test_case_name,
+          internal::UnitTestOptions::FilterMatchesTest(test_case_name,
                                                        test_name);
-#else 
-        internal::UnitTestOptions::MatchesFilter(test_case_name,
-        kMinCaseFilter) ||
-        internal::UnitTestOptions::MatchesFilter(test_name,
-        kMinCaseFilter);
-#endif
       test_info->matches_filter_ = matches_filter;
 
       const bool is_runnable =
