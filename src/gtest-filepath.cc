@@ -101,7 +101,7 @@ FilePath FilePath::GetCurrentDir() {
   // Windows CE doesn't have a current directory, so we just return
   // something reasonable.
   return FilePath(kCurrentDirectoryString);
-#elif GTEST_OS_WINDOWS_UWP || GTEST_OS_WINDOWS_PHONE
+#elif GTEST_OS_WINDOWS_RT || GTEST_OS_WINDOWS_PHONE
   auto folder = Windows::Storage::ApplicationData::Current->LocalFolder;
   wchar_t buffer[255];
   wcsncpy_s(buffer, 255, folder->Path->Data(), _TRUNCATE);
@@ -245,7 +245,7 @@ bool FilePath::DirectoryExists() const {
       (attributes & FILE_ATTRIBUTE_DIRECTORY)) {
     result = true;
   }
-#elif GTEST_OS_WINDOWS_UWP || GTEST_OS_WINDOWS_PHONE
+#elif GTEST_OS_WINDOWS_RT || GTEST_OS_WINDOWS_PHONE
   LPCWSTR unicode = String::AnsiToUtf16(path.c_str());
   WIN32_FILE_ATTRIBUTE_DATA attributes;
   BOOL ret = GetFileAttributesEx(unicode, GetFileExInfoStandard, &attributes);
