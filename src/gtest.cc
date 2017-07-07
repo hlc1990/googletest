@@ -156,6 +156,7 @@ using internal::Shuffle;
 // Constants.
 
 // A test whose test case name or test name matches this filter is
+// disabled and not run.
 static const char kDisableTestFilter[] = "DISABLED_*:*/DISABLED_*";
 
 // A test case whose name matches this filter is considered a death
@@ -849,19 +850,14 @@ TimeInMillis GetTimeInMillis() {
 
 // class String.
 
-#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_RT || GTEST_OS_WINDOWS_PHONE
+#if GTEST_OS_WINDOWS_MOBILE
 // Creates a UTF-16 wide string from the given ANSI string, allocating
 // memory using new. The caller is responsible for deleting the return
 // value using delete[]. Returns the wide string, or NULL if the
 // input is NULL.
 LPCWSTR String::AnsiToUtf16(const char* ansi) {
   if (!ansi) return NULL;
-
-  // since it's MultiByteToWideChar expects int, disable warning for this line
-#pragma warning (disable:4267)
   const int length = strlen(ansi);
-#pragma warning (default:4267)
-
   const int unicode_length =
       MultiByteToWideChar(CP_ACP, 0, ansi, length,
                           NULL, 0);

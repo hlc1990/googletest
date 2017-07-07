@@ -97,16 +97,10 @@ static bool IsPathSeparator(char c) {
 
 // Returns the current working directory, or "" if unsuccessful.
 FilePath FilePath::GetCurrentDir() {
-#if GTEST_OS_WINDOWS_MOBILE
+#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE || GTEST_OS_WINDOWS_RT
   // Windows CE doesn't have a current directory, so we just return
   // something reasonable.
   return FilePath(kCurrentDirectoryString);
-#elif GTEST_OS_WINDOWS_RT || GTEST_OS_WINDOWS_PHONE
-  auto folder = Windows::Storage::ApplicationData::Current->LocalFolder;
-  wchar_t buffer[255];
-  wcsncpy_s(buffer, 255, folder->Path->Data(), _TRUNCATE);
-  return FilePath(String::Utf16ToAnsi(buffer));
-
 #elif GTEST_OS_WINDOWS
   char cwd[GTEST_PATH_MAX_ + 1] = { '\0' };
   return FilePath(_getcwd(cwd, sizeof(cwd)) == NULL ? "" : cwd);
@@ -243,15 +237,6 @@ bool FilePath::DirectoryExists() const {
   delete [] unicode;
   if ((attributes != kInvalidFileAttributes) &&
       (attributes & FILE_ATTRIBUTE_DIRECTORY)) {
-    result = true;
-  }
-#elif GTEST_OS_WINDOWS_RT || GTEST_OS_WINDOWS_PHONE
-  LPCWSTR unicode = String::AnsiToUtf16(path.c_str());
-  WIN32_FILE_ATTRIBUTE_DATA attributes;
-  BOOL ret = GetFileAttributesEx(unicode, GetFileExInfoStandard, &attributes);
-  delete [] unicode;
-  if (ret &&
-      (attributes.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
     result = true;
   }
 #else

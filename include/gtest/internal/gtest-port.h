@@ -137,7 +137,7 @@
 //     GTEST_OS_WINDOWS_MINGW    - MinGW
 //     GTEST_OS_WINDOWS_MOBILE   - Windows Mobile
 //     GTEST_OS_WINDOWS_PHONE    - Windows Phone
-//     GTEST_OS_WINDOWS_RT      - Windows Store App/WinUWP
+//     GTEST_OS_WINDOWS_RT       - Windows Store App/WinRT
 //   GTEST_OS_ZOS      - z/OS
 //
 // Among the platforms, Cygwin, Linux, Max OS X, and Windows have the
@@ -393,9 +393,6 @@
 # if !GTEST_OS_WINDOWS_MOBILE
 #  include <direct.h>
 #  include <io.h>
-# endif
-# if GTEST_OS_WINDOWS_RT || GTEST_OS_WINDOWS_PHONE
-#  include <windows.h>
 # endif
 // In order to avoid having to include <windows.h>, use forward declaration
 // assuming CRITICAL_SECTION is a typedef of _RTL_CRITICAL_SECTION.
